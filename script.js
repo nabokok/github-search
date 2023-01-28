@@ -6,15 +6,24 @@ class Github {
   }
 
   async getUser(userName) {
-    const data = await fetch(`https://api.github.com/users/${userName}?client_id=${this.clientId}&client_secret=${this.clientSecret}`);
-    const profile = await data.json();
-    return profile;
+    try {
+      const data = await fetch(`https://api.github.com/users/${userName}?client_id=${this.clientId}&client_secret=${this.clientSecret}`);
+      const profile = await data.json();
+      return profile;
+    } catch (e) {
+      console.error(e);
+    }
+
   }
 
   async getRepos(userName) {
-    const data = await fetch(` https://api.github.com/users/${userName}/repos?client_id=${this.clientId}&client_secret=${this.clientSecret}`);
-    const repos = await data.json();
-    return repos;
+    try {
+      const data = await fetch(` https://api.github.com/users/${userName}/repos?client_id=${this.clientId}&client_secret=${this.clientSecret}`);
+      const repos = await data.json();
+      return repos;
+    } catch (e) {
+      console.error(e);
+    }
   }
 
 }
@@ -85,7 +94,7 @@ class UI {
 
   clearAlert() {
     const alertBlock = document.querySelector('.alert');
-    if(alertBlock) {
+    if (alertBlock) {
       alertBlock.remove();
     }
   }
@@ -106,25 +115,25 @@ const searchUser = document.querySelector('.searchUser');
 
 
 
-function debounce(func, timeout = 500){
+function debounce(func, timeout = 500) {
   let timer;
   return (e) => {
     clearTimeout(timer);
 
-    timer = setTimeout(() => { 
+    timer = setTimeout(() => {
       func(e);
-     }, timeout);
+    }, timeout);
   };
 }
 
-function saveInput(e){
+function saveInput(e) {
   ui.clearRepos();
   const userText = e.target.value;
 
-  if(userText.trim() !== '') {
+  if (userText.trim() !== '') {
     github.getUser(userText)
       .then(data => {
-        if(data.message === 'Not Found') {
+        if (data.message === 'Not Found') {
           // показувати помилку
           ui.showAlert('User not found', 'alert alert-danger');
         } else {
@@ -132,9 +141,9 @@ function saveInput(e){
 
         }
       })
-      github.getRepos(userText)
+    github.getRepos(userText)
       .then(data => {
-        if(data.length === 0) {
+        if (data.length === 0) {
           // показувати помилку
           ui.showAlert('Repos not found', 'alert alert-danger');
         } else {
@@ -145,7 +154,7 @@ function saveInput(e){
     // очистити інпут пошуку
     ui.clearProfile();
   }
-  
+
 }
 const processChange = debounce((event) => saveInput(event));
 
