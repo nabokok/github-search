@@ -6,24 +6,15 @@ class Github {
   }
 
   async getUser(userName) {
-    try {
       const data = await fetch(`https://api.github.com/users/${userName}?client_id=${this.clientId}&client_secret=${this.clientSecret}`);
       const profile = await data.json();
       return profile;
-    } catch (e) {
-      console.error(e);
-    }
-
   }
 
   async getRepos(userName) {
-    try {
-      const data = await fetch(` https://api.github.com/users/${userName}/repos?client_id=${this.clientId}&client_secret=${this.clientSecret}`);
+      const data = await fetch(`https://api.github.com/users/${userName}/repos?client_id=${this.clientId}&client_secret=${this.clientSecret}`);
       const repos = await data.json();
       return repos;
-    } catch (e) {
-      console.error(e);
-    }
   }
 
 }
@@ -131,25 +122,24 @@ function saveInput(e) {
   const userText = e.target.value;
 
   if (userText.trim() !== '') {
-    github.getUser(userText)
-      .then(data => {
-        if (data.message === 'Not Found') {
-          // показувати помилку
-          ui.showAlert('User not found', 'alert alert-danger');
-        } else {
-          ui.showProfile(data);
-
-        }
-      })
-    github.getRepos(userText)
-      .then(data => {
-        if (data.length === 0) {
-          // показувати помилку
-          ui.showAlert('Repos not found', 'alert alert-danger');
-        } else {
-          ui.showRepos(data);
-        }
-      })
+    Promise.all([github.getUser(userText), github.getRepos(userText)]).then(([userData, reposData]) => {
+      console.log(reposData)
+      if (userData.message === 'Not Found') {
+        ui.showAlert('User not found', 'alert alert-danger');
+      } 
+      if (userData.message !== 'Not Found'){
+        ui.showProfile(userData)
+      } 
+      if (reposData.length === 0) {
+        console.log('test')
+        ui.showAlert('Repos not found', 'alert alert-danger');
+      } 
+      if (reposData.length > 0) {
+        ui.showRepos(reposData)
+      } 
+    }, reason => {
+      alert(reason.message);
+    })
   } else {
     // очистити інпут пошуку
     ui.clearProfile();
